@@ -1,16 +1,17 @@
 "use client";
 
+import { use } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ROUTES } from "../../../router";
 
 interface BlogPostPageProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 export default function BlogPostPage({ params }: BlogPostPageProps) {
   const router = useRouter();
-  const { id } = params;
+  const { id } = use(params);
 
   return (
     <div>
