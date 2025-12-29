@@ -1,29 +1,32 @@
 "use client";
-import React, { useState } from 'react';
-import { Menu, X } from 'lucide-react';
+import React, { useState } from "react";
+import { Menu, X } from "lucide-react";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const navItems = [
-    { name: 'Home', href: '/' },
-    { name: 'About', href: '/about' },
-    { name: 'Projects', href: '/projects' },
-    { name: 'Research', href: '/research' },
-    { name: 'Contact', href: '/contact' }
+    { name: "Home", href: "#home" },
+    { name: "About", href: "#about" },
+    { name: "Projects", href: "#projects" },
+    { name: "Research", href: "#research" },
+    { name: "Contact", href: "#contact" },
   ];
 
   return (
-    <nav className="bg-gray-900 text-white shadow-lg">
+    <nav className="bg-gray-900 text-white shadow-lg fixed w-full z-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <div className="flex-shrink-0 flex items-center">
-            <div className="flex items-center space-x-2" onClick={ () => window.location.href = '/' }>
-              <div className="w-8 h-8 bg-orange-500 rounded flex items-center justify-center">
-                <span className="text-white font-bold text-sm">S</span>
+            <div
+              className="flex items-center space-x-2 cursor-pointer"
+              onClick={() => (window.location.href = "/")}
+            >
+              <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-cyan-400 rounded flex items-center justify-center">
+                <span className="text-white font-bold text-sm">TT</span>
               </div>
-              <span className="font-semibold text-lg">SignalMaster</span>
+              <span className="font-semibold text-lg">Toan Tran</span>
             </div>
           </div>
 
