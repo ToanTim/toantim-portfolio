@@ -1,21 +1,21 @@
 // src/utils/gradients.ts  (or wherever you prefer)
 
 export const GRADIENTS = [
-  "from-blue-400 via-sky-400 to-cyan-500",
-  "from-indigo-500 via-purple-500 to-pink-500", // already good
-  "from-rose-400 via-pink-500 to-fuchsia-600",
-  "from-emerald-400 via-teal-400 to-cyan-500",
-  "from-amber-400 via-orange-500 to-rose-500",
-  "from-violet-500 via-purple-500 to-indigo-600",
-  "from-sky-400 via-blue-500 to-indigo-600",
-  "from-lime-400 via-green-500 to-emerald-600",
-  "from-pink-400 via-rose-500 to-red-500",
-  "from-cyan-400 via-blue-500 to-indigo-500",
-  "from-purple-400 via-indigo-500 to-blue-600",
-  "from-yellow-400 via-amber-500 to-orange-600",
-  "from-red-400 via-rose-500 to-pink-600",
-  "from-teal-400 via-cyan-500 to-sky-600",
-  "from-fuchsia-500 via-pink-500 to-rose-600",
+  "from-blue-300 via-sky-400 to-cyan-600",
+  "from-indigo-400 via-purple-500 to-pink-600",
+  "from-rose-300 via-pink-500 to-fuchsia-700",
+  "from-emerald-300 via-teal-400 to-cyan-700",
+  "from-amber-300 via-orange-500 to-rose-600",
+  "from-violet-400 via-purple-600 to-indigo-700",
+  "from-sky-300 via-blue-500 to-indigo-800",
+  "from-lime-300 via-green-500 to-emerald-700",
+  "from-pink-300 via-rose-500 to-red-600",
+  "from-cyan-300 via-blue-500 to-indigo-700",
+  "from-purple-300 via-indigo-500 to-blue-800",
+  "from-yellow-300 via-amber-500 to-orange-700",
+  "from-red-300 via-rose-500 to-pink-700",
+  "from-teal-300 via-cyan-500 to-sky-700",
+  "from-fuchsia-400 via-pink-600 to-rose-700",
 ] as const;  // 'as const' makes the array readonly + gives literal types
 
 // Type for better autocomplete & safety
