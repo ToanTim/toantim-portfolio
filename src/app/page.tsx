@@ -5,7 +5,7 @@ import Navbar from "../components/Navbar";
 import About from "./about/page";
 import Contact from "./contact/page";
 import Research from "./research/page";
-import Project from "./projectss/page";
+import Project from "./projects/page";
 export default function Home() {
   const [showScrollTop, setShowScrollTop] = useState(false);
 
