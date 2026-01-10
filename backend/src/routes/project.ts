@@ -35,13 +35,14 @@ router.get("/overview", async (req: Request, res: Response) => {
         description: 1,
         tech: 1,
         gradient: 1,
+        image: 1,
       }
     )
       .sort({ createdAt: -1 }) // newest first
       .lean();
 
     const result = projects.map((p) => ({
-      id: p.id,
+      id: p._id,
       title: p.title,
       description: p.description,
       tech: p.tech,
