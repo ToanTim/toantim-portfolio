@@ -6,6 +6,7 @@ import Link from "next/link";
 import type { ProjectData, Step } from "../../../types/types";
 import { getProjectById } from "@/utils/fetchProjectApi";
 import { ImageSwiper } from "@/components";
+import { ProjectDetailSkeleton } from "@/components/skeletons";
 import { time } from "console";
 
 export default function ProjectDetail() {
@@ -24,7 +25,9 @@ export default function ProjectDetail() {
       //console.log(data);
       setTimeout(() => {
         setLoading(false);
-      }, 500);
+      }, 500); // So it not gonna blinkning too fast
+
+      // If no data, redirect to /#projects
       if (!data) {
         router.push("/#projects");
       }
@@ -32,13 +35,7 @@ export default function ProjectDetail() {
   }, [projectId, router]);
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-900">
-        <div className="text-center">
-          <p className="text-gray-400">Loading project...</p>
-        </div>
-      </div>
-    );
+    return <ProjectDetailSkeleton />;
   }
 
   if (!project) {

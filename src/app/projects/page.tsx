@@ -4,22 +4,34 @@ import Link from "next/link";
 import { ProjectOverview } from "@/types/types";
 import { useEffect, useState } from "react";
 import { getProjectsOverview } from "@/utils/fetchProjectApi";
+import { ProjectsGridSkeleton } from "@/components/skeletons";
 
 export default function Project() {
   const [projects, setProjects] = useState<ProjectOverview[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     async function fetchData() {
       try {
+        setIsLoading(true);
         const data = await getProjectsOverview(); // await the promise
         //console.log(data); // log it
         setProjects(data); // set state
       } catch (error) {
         console.error("Failed to fetch projects:", error);
+      } finally {
+        setTimeout(() => {
+          // Delay to show skeleton
+          setIsLoading(false);
+        }, 500);
       }
     }
     fetchData();
   }, []);
+
+  if (isLoading) {
+    return <ProjectsGridSkeleton count={6} />;
+  }
 
   return (
     <div className="container mx-auto px-4 py-16">
