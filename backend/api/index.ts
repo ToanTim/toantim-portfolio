@@ -2,10 +2,11 @@ import express, { Request, Response } from 'express';
 import cors from 'cors';
 import bodyParser from 'body-parser';
 import dotenv from 'dotenv';
-import { connectDB } from './utils/db';
-import visitorRoutes from './routes/visitor';
-import contactRoutes from './routes/contact';
-import projectRouter from './routes/project';
+import { connectDB } from '../src/utils/db';
+import visitorRoutes from '../src/routes/visitor';
+import contactRoutes from '../src/routes/contact';
+import projectRouter from '../src/routes/project';
+import e from 'express';
 dotenv.config();
 
 const app = express();
@@ -16,7 +17,7 @@ app.use(
   cors({
     origin: [
       'http://localhost:3000',
-      'https://toantim.vercel.app',
+      'https://toantim-portfolio.vercel.app',
       'https://toantim.com',
     ],
     credentials: true,
@@ -46,7 +47,12 @@ app.use((req: Request, res: Response) => {
 
 // Start server
 app.listen(PORT, () => {
-  console.log(`Server running on port http://localhost:${PORT}`);
+  if (process.env.NODE_ENV !== 'production') {
+    console.log(`Server running in development mode on http://localhost:${PORT}`);
+  }
+  else {
+    console.log(`Server running in production mode up MongoDB cloud`);
+  }
 });
 
 export default app;
