@@ -1,12 +1,14 @@
 // lib/getProjectById.ts
 import { ProjectData, ProjectOverview } from "@/types/types";
 
+const API=process.env.NODE_ENV==='production'? process.env.NEXT_PUBLIC_API_URL_PRODUCTION : process.env.NEXT_PUBLIC_API_URL;
+
 export async function getProjectById(
   id: string
 ): Promise<ProjectData | null> {
   try {
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/projects/${id}`,
+      `${API}/projects/${id}`,
       {
         cache: "no-store", // or "force-cache" / revalidate if needed
       }
@@ -25,7 +27,7 @@ export async function getProjectById(
 
 export async function getProjectsOverview(): Promise<ProjectOverview[]> {
   const res = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/projects/overview`,
+    `${API}/projects/overview`,
     {
       cache: "no-store", // or 'force-cache' if you want static
     }

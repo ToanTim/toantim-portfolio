@@ -1,0 +1,8 @@
+
+{
+  "version": 2,
+  "env": {
+    "NEXT_PUBLIC_API_URL_PRODUCTION": "https://toatim-portfolio-back-end.vercel.app/api",
+    "NODE_ENV": "production"
+  }
+}
