@@ -21,7 +21,7 @@ export default function ProjectDetail() {
     setLoading(true);
     getProjectById(projectId).then((data) => {
       setProject(data);
-      console.log(data);
+      //console.log(data);
       setTimeout(() => {
         setLoading(false);
       }, 500);
@@ -51,7 +51,7 @@ export default function ProjectDetail() {
     if (currentIndex > 0) {
       setActiveStep(project.steps[currentIndex - 1].id);
       setCurrentIndex(currentIndex - 1);
-      console.log(currentIndex);
+      //console.log(currentIndex);
     }
   };
 
@@ -60,7 +60,7 @@ export default function ProjectDetail() {
     if (currentIndex < project_step_length - 1) {
       setActiveStep(project.steps[currentIndex + 1].id);
       setCurrentIndex(currentIndex + 1);
-      console.log(currentIndex);
+      //console.log(currentIndex);
     }
   };
 
