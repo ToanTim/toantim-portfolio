@@ -1,0 +1,429 @@
+/**
+ * CACHING SYSTEM - PRACTICAL EXAMPLES
+ * Real-world usage patterns for the API caching system
+ */
+
+// ============================================================================
+// EXAMPLE 1: Simple Project List Page
+// ============================================================================
+
+import { useFetchWithCache } from "@/hooks/useFetchWithCache";
+import { ProjectsGridSkeleton } from "@/components/skeletons";
+
+export function ProjectsPageExample() {
+  // Fetch with 15-minute cache
+  const { data: projects, loading, error, refetch, cached } = useFetchWithCache(
+    "/api/projects/overview",
+    {},
+    { ttl: 15 * 60 * 1000 }
+  );
+
+  if (loading) return <ProjectsGridSkeleton />;
+  if (error) return <ErrorBoundary error={error} onRetry={refetch} />;
+
+  return (
+    <div>
+      {cached && <span className="text-xs text-gray-500">📦 Cached</span>}
+      <div className="grid grid-cols-3 gap-4">
+        {projects?.map(project => (
+          <ProjectCard key={project.id} {...project} />
+        ))}
+      </div>
+      <button onClick={refetch} className="mt-4">
+        Refresh
+      </button>
+    </div>
+  );
+}
+
+// ============================================================================
+// EXAMPLE 2: Project Detail Page with Auto-Invalidation
+// ============================================================================
+
+import { useFetchWithCache, useInvalidateCache } from "@/hooks/useFetchWithCache";
+
+export function ProjectDetailPageExample({ projectId }) {
+  // Fetch project details with 10-minute cache
+  const { data: project, loading, error } = useFetchWithCache(
+    `/api/projects/${projectId}`,
+    {},
+    { ttl: 10 * 60 * 1000 }
+  );
+
+  // Setup cache invalidation
+  const invalidateProject = useInvalidateCache(`/api/projects/${projectId}`);
+  const invalidateProjects = useInvalidateCache("/api/projects/overview");
+
+  // Update handler with cache clearing
+  const handleUpdateProject = async (updates) => {
+    await updateProjectAPI(projectId, updates);
+    invalidateProject(); // Refresh this project's detail
+    invalidateProjects(); // Also refresh project list
+  };
+
+  if (loading) return <ProjectDetailSkeleton />;
+  if (error) return <ErrorMessage error={error} />;
+
+  return (
+    <div>
+      <ProjectContent project={project} />
+      <button onClick={() => handleUpdateProject({ status: "archived" })}>
+        Archive Project
+      </button>
+    </div>
+  );
+}
+
+// ============================================================================
+// EXAMPLE 3: Searchable List with Individual Item Cache
+// ============================================================================
+
+import { fetchWithCache } from "@/utils/fetchWithCache";
+import { useState } from "react";
+
+export function SearchableProjectsExample() {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [results, setResults] = useState([]);
+  const [searching, setSearching] = useState(false);
+
+  // Cache each search result separately
+  const handleSearch = async (query) => {
+    setSearchQuery(query);
+    setSearching(true);
+
+    try {
+      const { data, cached } = await fetchWithCache(
+        `/api/projects/search?q=${encodeURIComponent(query)}`,
+        {},
+        {
+          ttl: 10 * 60 * 1000, // 10 minutes
+          storageType: "localStorage",
+        }
+      );
+
+      setResults(data);
+      console.log(cached ? "From cache" : "Fresh from API");
+    } catch (error) {
+      console.error("Search failed:", error);
+    } finally {
+      setSearching(false);
+    }
+  };
+
+  return (
+    <div>
+      <input
+        type="text"
+        value={searchQuery}
+        onChange={e => handleSearch(e.target.value)}
+        placeholder="Search projects..."
+      />
+      {searching && <LoadingSpinner />}
+      {results.map(project => (
+        <SearchResultItem key={project.id} {...project} />
+      ))}
+    </div>
+  );
+}
+
+// ============================================================================
+// EXAMPLE 4: Form with Lazy-Loaded Dropdown (Cached Data)
+// ============================================================================
+
+import { fetchWithCache } from "@/utils/fetchWithCache";
+import { useEffect, useState } from "react";
+
+export function ProjectFormWithCachedDropdown() {
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  // Load categories once and cache for 1 hour
+  useEffect(() => {
+    async function loadCategories() {
+      setLoading(true);
+      const { data } = await fetchWithCache(
+        "/api/categories",
+        {},
+        { ttl: 60 * 60 * 1000 } // 1 hour - static data
+      );
+      setCategories(data);
+      setLoading(false);
+    }
+
+    loadCategories();
+  }, []);
+
+  return (
+    <form>
+      <input type="text" placeholder="Project title" required />
+
+      <select disabled={loading}>
+        <option value="">Select category</option>
+        {categories.map(cat => (
+          <option key={cat.id} value={cat.id}>
+            {cat.name}
+          </option>
+        ))}
+      </select>
+
+      <button type="submit">Create Project</button>
+    </form>
+  );
+}
+
+// ============================================================================
+// EXAMPLE 5: Mutation with Cache Invalidation Pattern
+// ============================================================================
+
+import { fetchWithCachePOST } from "@/utils/fetchWithCache";
+import { invalidateCacheForUrl } from "@/utils/fetchWithCache";
+
+export function CreateProjectFormExample() {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  const handleSubmit = async (formData) => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      // POST requests don't cache by default
+      const { data } = await fetchWithCachePOST("/api/projects", formData);
+
+      // Invalidate related caches
+      invalidateCacheForUrl("/api/projects/overview");
+      invalidateCacheForUrl("/api/projects/search");
+
+      // Redirect or show success
+      redirectTo(`/projects/${data.id}`);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <form onSubmit={e => {
+      e.preventDefault();
+      handleSubmit(new FormData(e.currentTarget));
+    }}>
+      {/* Form fields */}
+      <button disabled={loading}>{loading ? "Creating..." : "Create"}</button>
+      {error && <ErrorAlert message={error} />}
+    </form>
+  );
+}
+
+// ============================================================================
+// EXAMPLE 6: Advanced - Batch Operations with Cache Management
+// ============================================================================
+
+import { fetchWithCache, invalidateCacheForUrl } from "@/utils/fetchWithCache";
+
+export async function bulkUpdateProjects(projectIds, updates) {
+  // Perform update
+  const { data } = await fetchWithCache(
+    "/api/projects/bulk-update",
+    {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ projectIds, updates }),
+    },
+    { ttl: 0 } // Don't cache mutations
+  );
+
+  // Invalidate all affected caches
+  await Promise.all([
+    invalidateCacheForUrl("/api/projects/overview"),
+    invalidateCacheForUrl("/api/projects/search"),
+    ...projectIds.map(id => invalidateCacheForUrl(`/api/projects/${id}`)),
+  ]);
+
+  return data;
+}
+
+// ============================================================================
+// EXAMPLE 7: Offline-First Pattern (Stale Cache as Fallback)
+// ============================================================================
+
+import { fetchWithCache } from "@/utils/fetchWithCache";
+
+export function OfflineFirstComponent() {
+  const [data, setData] = useState(null);
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, []);
+
+  useEffect(() => {
+    async function load() {
+      try {
+        const { data, error } = await fetchWithCache("/api/data");
+        setData(data);
+
+        if (error) {
+          console.log("Using stale cache (offline mode)");
+        }
+      } catch (err) {
+        console.error("Offline - check cache for data");
+      }
+    }
+
+    load();
+  }, []);
+
+  if (!data && !isOnline) {
+    return <OfflineMessage />;
+  }
+
+  return <Content data={data} />;
+}
+
+// ============================================================================
+// EXAMPLE 8: Performance Monitoring
+// ============================================================================
+
+import { fetchWithCache } from "@/utils/fetchWithCache";
+
+export async function fetchWithMetrics(url, options) {
+  const startTime = performance.now();
+
+  const { data, cached } = await fetchWithCache(url, options);
+
+  const duration = performance.now() - startTime;
+
+  // Track metrics
+  window.analytics?.track("api_fetch", {
+    url,
+    cached,
+    duration,
+    timestamp: new Date(),
+  });
+
+  // Log performance
+  console.log(
+    `[${cached ? "CACHE" : "API"}] ${url} - ${duration.toFixed(2)}ms`
+  );
+
+  return { data, cached, duration };
+}
+
+// ============================================================================
+// EXAMPLE 9: Conditional Caching Based on User Preferences
+// ============================================================================
+
+export function ConditionalCachingExample() {
+  const [cacheEnabled, setCacheEnabled] = useState(
+    localStorage.getItem("cache-enabled") !== "false"
+  );
+
+  const handleFetch = async (url) => {
+    const { data } = await fetchWithCache(
+      url,
+      {},
+      {
+        forceRefresh: !cacheEnabled, // Skip cache if disabled
+        ttl: cacheEnabled ? 5 * 60 * 1000 : 0,
+      }
+    );
+    return data;
+  };
+
+  const handleToggleCache = (enabled) => {
+    setCacheEnabled(enabled);
+    localStorage.setItem("cache-enabled", enabled ? "true" : "false");
+  };
+
+  return (
+    <div>
+      <label>
+        <input
+          type="checkbox"
+          checked={cacheEnabled}
+          onChange={e => handleToggleCache(e.target.checked)}
+        />
+        Enable caching
+      </label>
+    </div>
+  );
+}
+
+// ============================================================================
+// EXAMPLE 10: Session-Based Caching (User-Specific Data)
+// ============================================================================
+
+import { useFetchWithCache } from "@/hooks/useFetchWithCache";
+
+export function UserProfileExample() {
+  // Use sessionStorage for user-specific data
+  // Clears when user closes the tab/browser
+  const { data: user, refetch } = useFetchWithCache(
+    "/api/user/profile",
+    {},
+    {
+      ttl: 30 * 60 * 1000, // 30 minutes
+      storageType: "sessionStorage", // Per-session only
+    }
+  );
+
+  const handleLogout = () => {
+    // Cache is cleared when sessionStorage is wiped
+    clearAllCache("sessionStorage");
+    window.location.href = "/login";
+  };
+
+  return (
+    <div>
+      <h1>Welcome, {user?.name}</h1>
+      <button onClick={() => refetch()}>Refresh profile</button>
+      <button onClick={handleLogout}>Logout</button>
+    </div>
+  );
+}
+
+// ============================================================================
+// USAGE NOTES
+// ============================================================================
+
+/*
+BEST PRACTICES FROM EXAMPLES:
+
+1. Static data (categories, settings)
+   → ttl: 60 * 60 * 1000 (1 hour)
+   → storageType: "localStorage"
+
+2. User-specific data (profile)
+   → ttl: 30 * 60 * 1000 (30 minutes)
+   → storageType: "sessionStorage"
+
+3. Dynamic data (projects list)
+   → ttl: 15 * 60 * 1000 (15 minutes)
+   → storageType: "localStorage"
+
+4. Search results
+   → ttl: 10 * 60 * 1000 (10 minutes)
+   → storageType: "localStorage"
+
+5. Mutations (POST/PUT/DELETE)
+   → ttl: 0 (don't cache)
+   → Always invalidate related caches
+
+6. Real-time data
+   → ttl: 30 * 1000 (30 seconds)
+   → forceRefresh: true for critical updates
+
+7. Offline-first
+   → Check error field to detect stale cache
+   → Provide offline UI when network fails
+*/

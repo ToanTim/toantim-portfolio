@@ -1,0 +1,482 @@
+/**
+ * CACHING SYSTEM - CONFIGURATION GUIDE
+ * Customize caching behavior for your application
+ */
+
+// ============================================================================
+// 1. GLOBAL DEFAULTS
+// ============================================================================
+
+// File: src/utils/fetchWithCache.ts
+// Location: Near the top of the file
+
+// Default TTL for all cached requests (milliseconds)
+export const DEFAULT_TTL = 5 * 60 * 1000; // 5 minutes
+
+// Default storage type for all requests
+export const DEFAULT_STORAGE = "localStorage"; // or "sessionStorage" or "memory"
+
+// Example: Change to 10 minutes
+// export const DEFAULT_TTL = 10 * 60 * 1000;
+
+// Example: Change to sessionStorage
+// export const DEFAULT_STORAGE = "sessionStorage";
+
+// ============================================================================
+// 2. PER-ENDPOINT CONFIGURATION
+// ============================================================================
+
+// Recommended TTL values for different data types:
+const TTL_CONFIG = {
+  // Static/Reference Data - Cache for 1 hour
+  STATIC: 60 * 60 * 1000,
+
+  // User/Account Data - Cache for 30 minutes
+  USER: 30 * 60 * 1000,
+
+  // Project Data - Cache for 15 minutes
+  PROJECT: 15 * 60 * 1000,
+
+  // Search Results - Cache for 10 minutes
+  SEARCH: 10 * 60 * 1000,
+
+  // Real-time Data - Cache for 1 minute
+  REALTIME: 1 * 60 * 1000,
+
+  // Very Dynamic - Cache for 30 seconds
+  DYNAMIC: 30 * 1000,
+
+  // Don't Cache - For mutations
+  NONE: 0,
+};
+
+// ============================================================================
+// 3. EXAMPLE: CONFIGURED API CLIENT
+// ============================================================================
+
+import { fetchWithCache, FetchOptions, CacheOptions } from "@/utils/fetchWithCache";
+
+/**
+ * Preconfigured API client with sensible defaults
+ */
+class CachedAPIClient {
+  private baseURL: string;
+
+  constructor(baseURL: string = process.env.NEXT_PUBLIC_API_URL || "") {
+    this.baseURL = baseURL;
+  }
+
+  /**
+   * GET request with caching
+   */
+  async get<T>(
+    endpoint: string,
+    cacheStrategy: "static" | "user" | "project" | "search" | "realtime" | "none" = "project"
+  ): Promise<T> {
+    const ttl = TTL_CONFIG[cacheStrategy.toUpperCase()] || TTL_CONFIG.PROJECT;
+
+    const { data } = await fetchWithCache<T>(
+      `${this.baseURL}${endpoint}`,
+      { method: "GET" },
+      {
+        ttl,
+        storageType: "localStorage",
+      }
+    );
+
+    return data;
+  }
+
+  /**
+   * POST request (typically not cached)
+   */
+  async post<T>(endpoint: string, body: any): Promise<T> {
+    const { data } = await fetchWithCache<T>(
+      `${this.baseURL}${endpoint}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      },
+      { ttl: 0 } // Don't cache mutations
+    );
+
+    return data;
+  }
+
+  /**
+   * PUT request (typically not cached)
+   */
+  async put<T>(endpoint: string, body: any): Promise<T> {
+    const { data } = await fetchWithCache<T>(
+      `${this.baseURL}${endpoint}`,
+      {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      },
+      { ttl: 0 }
+    );
+
+    return data;
+  }
+
+  /**
+   * DELETE request (typically not cached)
+   */
+  async delete<T>(endpoint: string): Promise<T> {
+    const { data } = await fetchWithCache<T>(
+      `${this.baseURL}${endpoint}`,
+      { method: "DELETE" },
+      { ttl: 0 }
+    );
+
+    return data;
+  }
+}
+
+// Usage:
+// const api = new CachedAPIClient();
+// const projects = await api.get("/projects", "project");
+
+// ============================================================================
+// 4. ENVIRONMENT-SPECIFIC CONFIGURATION
+// ============================================================================
+
+// File: .env.local (development)
+// NEXT_PUBLIC_CACHE_TTL=300000 // 5 minutes
+// NEXT_PUBLIC_CACHE_ENABLED=true
+
+// File: .env.production
+// NEXT_PUBLIC_CACHE_TTL=900000 // 15 minutes
+// NEXT_PUBLIC_CACHE_ENABLED=true
+
+// Runtime configuration:
+const getCacheTTL = (): number => {
+  if (typeof window === "undefined") return 0; // SSR: don't cache
+
+  const env = process.env.NEXT_PUBLIC_CACHE_TTL;
+  return env ? parseInt(env, 10) : DEFAULT_TTL;
+};
+
+const isCacheEnabled = (): boolean => {
+  return process.env.NEXT_PUBLIC_CACHE_ENABLED !== "false";
+};
+
+// ============================================================================
+// 5. USER PREFERENCE-BASED CONFIGURATION
+// ============================================================================
+
+/**
+ * Allow users to control caching via settings
+ */
+class UserCachePreferences {
+  private storageKey = "user-cache-preferences";
+
+  get enabled(): boolean {
+    if (typeof window === "undefined") return true;
+    const saved = localStorage.getItem(this.storageKey);
+    return saved ? JSON.parse(saved).enabled : true;
+  }
+
+  set enabled(value: boolean) {
+    if (typeof window === "undefined") return;
+    localStorage.setItem(
+      this.storageKey,
+      JSON.stringify({ enabled: value, timestamp: Date.now() })
+    );
+  }
+
+  get storageType(): "localStorage" | "sessionStorage" {
+    if (typeof window === "undefined") return "localStorage";
+    const saved = localStorage.getItem(this.storageKey);
+    return saved ? JSON.parse(saved).storageType : "localStorage";
+  }
+
+  set storageType(value: "localStorage" | "sessionStorage") {
+    if (typeof window === "undefined") return;
+    const current = localStorage.getItem(this.storageKey);
+    const prefs = current ? JSON.parse(current) : {};
+    localStorage.setItem(
+      this.storageKey,
+      JSON.stringify({ ...prefs, storageType: value })
+    );
+  }
+
+  clear(): void {
+    if (typeof window === "undefined") return;
+    localStorage.removeItem(this.storageKey);
+  }
+}
+
+// Usage in components:
+// const prefs = new UserCachePreferences();
+// <ToggleSwitch
+//   checked={prefs.enabled}
+//   onChange={v => prefs.enabled = v}
+//   label="Enable caching"
+// />
+
+// ============================================================================
+// 6. CONDITIONAL CACHING BASED ON NETWORK
+// ============================================================================
+
+/**
+ * Only cache when user has good network connection
+ */
+class SmartCacheManager {
+  async fetchWithSmartCache<T>(
+    url: string,
+    fetchOptions?: FetchOptions,
+    baseCacheOptions?: CacheOptions
+  ): Promise<T> {
+    // Check if device is online
+    if (!navigator.onLine) {
+      console.log("Offline: using cache regardless of TTL");
+      return fetchWithCache<T>(url, fetchOptions, {
+        ...baseCacheOptions,
+        forceRefresh: false, // Use cache even if expired
+      });
+    }
+
+    // Check connection speed (if available)
+    if ("connection" in navigator) {
+      const conn = (navigator as any).connection;
+      const effectiveType = conn.effectiveType; // "4g", "3g", "2g", "slow-2g"
+
+      // Cache more aggressively on slow connections
+      if (effectiveType === "2g" || effectiveType === "slow-2g") {
+        console.log("Slow connection: using longer cache");
+        return fetchWithCache<T>(url, fetchOptions, {
+          ...baseCacheOptions,
+          ttl: (baseCacheOptions?.ttl || DEFAULT_TTL) * 2, // Double TTL
+        });
+      }
+
+      // Cache less on fast connections
+      if (effectiveType === "4g") {
+        return fetchWithCache<T>(url, fetchOptions, {
+          ...baseCacheOptions,
+          ttl: (baseCacheOptions?.ttl || DEFAULT_TTL) / 2, // Half TTL
+        });
+      }
+    }
+
+    return fetchWithCache<T>(url, fetchOptions, baseCacheOptions);
+  }
+}
+
+// ============================================================================
+// 7. CACHE WARMING STRATEGY
+// ============================================================================
+
+/**
+ * Pre-fetch and cache important data on app startup
+ */
+async function warmCache() {
+  try {
+    const api = new CachedAPIClient();
+
+    // Load immediately on startup
+    await Promise.all([
+      api.get("/categories", "static"),
+      api.get("/projects/overview", "project"),
+      api.get("/user/profile", "user"),
+    ]);
+
+    console.log("✅ Cache warmed successfully");
+  } catch (error) {
+    console.warn("Cache warming failed (non-critical):", error);
+  }
+}
+
+// Call in layout or app root:
+// useEffect(() => { warmCache(); }, []);
+
+// ============================================================================
+// 8. CACHE CLEANUP STRATEGY
+// ============================================================================
+
+/**
+ * Periodically clean up old cache entries
+ */
+class CacheCleanupManager {
+  private cleanupInterval: NodeJS.Timeout | null = null;
+
+  /**
+   * Start automatic cleanup every 30 minutes
+   */
+  startAutoCleanup(intervalMs = 30 * 60 * 1000): void {
+    this.cleanupInterval = setInterval(() => {
+      this.cleanup();
+    }, intervalMs);
+  }
+
+  /**
+   * Stop cleanup
+   */
+  stopAutoCleanup(): void {
+    if (this.cleanupInterval) {
+      clearInterval(this.cleanupInterval);
+      this.cleanupInterval = null;
+    }
+  }
+
+  /**
+   * Remove old cache entries that exceed a size limit
+   */
+  private cleanup(): void {
+    if (typeof window === "undefined") return;
+
+    const storage = window.localStorage;
+    const maxSize = 5 * 1024 * 1024; // 5MB limit
+    let currentSize = 0;
+
+    // Calculate current size
+    for (let i = 0; i < storage.length; i++) {
+      const key = storage.key(i);
+      if (key?.startsWith("cache:")) {
+        const item = storage.getItem(key);
+        currentSize += item?.length || 0;
+      }
+    }
+
+    // If over limit, remove oldest entries
+    if (currentSize > maxSize) {
+      const entries = [];
+
+      for (let i = 0; i < storage.length; i++) {
+        const key = storage.key(i);
+        if (key?.startsWith("cache:")) {
+          try {
+            const item = JSON.parse(storage.getItem(key) || "");
+            entries.push({
+              key,
+              timestamp: item.timestamp,
+              size: (storage.getItem(key) || "").length,
+            });
+          } catch {}
+        }
+      }
+
+      // Sort by timestamp, remove oldest
+      entries.sort((a, b) => a.timestamp - b.timestamp);
+
+      let freed = 0;
+      for (const entry of entries) {
+        if (freed > maxSize * 0.2) break; // Free 20% of max size
+        storage.removeItem(entry.key);
+        freed += entry.size;
+      }
+
+      console.log(`Cache cleanup: freed ${(freed / 1024).toFixed(2)}KB`);
+    }
+  }
+}
+
+// Usage:
+// const cleanup = new CacheCleanupManager();
+// cleanup.startAutoCleanup();
+
+// ============================================================================
+// 9. CACHE MONITORING & ANALYTICS
+// ============================================================================
+
+/**
+ * Track cache hits/misses for analytics
+ */
+class CacheAnalytics {
+  private stats = {
+    hits: 0,
+    misses: 0,
+    errors: 0,
+    totalTime: 0,
+  };
+
+  trackFetch(cached: boolean, duration: number, error?: Error): void {
+    if (error) {
+      this.stats.errors++;
+    } else if (cached) {
+      this.stats.hits++;
+    } else {
+      this.stats.misses++;
+    }
+    this.stats.totalTime += duration;
+  }
+
+  getStats(): {
+    hitRate: string;
+    avgTime: number;
+    errorRate: string;
+  } {
+    const total = this.stats.hits + this.stats.misses;
+    return {
+      hitRate: total > 0 ? ((this.stats.hits / total) * 100).toFixed(2) + "%" : "0%",
+      avgTime: this.stats.totalTime / (total || 1),
+      errorRate: total > 0 ? ((this.stats.errors / (total + this.stats.errors)) * 100).toFixed(2) + "%" : "0%",
+    };
+  }
+
+  reset(): void {
+    this.stats = { hits: 0, misses: 0, errors: 0, totalTime: 0 };
+  }
+}
+
+// ============================================================================
+// 10. QUICK SETUP CHECKLIST
+// ============================================================================
+
+/*
+SETUP CHECKLIST:
+
+1. ✅ Import functions in your components
+   import { useFetchWithCache } from "@/hooks/useFetchWithCache";
+   import { fetchWithCache } from "@/utils/fetchWithCache";
+
+2. ✅ Replace fetch calls with fetchWithCache
+   // Before: await fetch(url).then(r => r.json())
+   // After: const { data } = await fetchWithCache(url)
+
+3. ✅ Set appropriate TTL per endpoint
+   // Static data: 1 hour
+   // User data: 30 minutes
+   // Project data: 15 minutes
+
+4. ✅ Invalidate cache after mutations
+   invalidateCacheForUrl("/api/projects")
+
+5. ✅ Monitor in DevTools
+   DevTools → Application → Local Storage → Look for "cache:" keys
+
+6. ✅ (Optional) Set up cache cleanup
+   const cleanup = new CacheCleanupManager();
+   cleanup.startAutoCleanup();
+
+7. ✅ (Optional) Add cache analytics
+   const analytics = new CacheAnalytics();
+
+8. ✅ Test offline mode
+   DevTools → Network → Offline → Verify stale cache is returned
+
+9. ✅ Clear cache in logout/reset
+   clearAllCache("localStorage");
+   clearAllCache("sessionStorage");
+
+10. ✅ Monitor performance
+    Check Network tab for reduced API calls
+    Check Application tab for storage usage
+*/
+
+// ============================================================================
+// EXPORTS
+// ============================================================================
+
+export {
+  CachedAPIClient,
+  UserCachePreferences,
+  SmartCacheManager,
+  warmCache,
+  CacheCleanupManager,
+  CacheAnalytics,
+  TTL_CONFIG,
+};

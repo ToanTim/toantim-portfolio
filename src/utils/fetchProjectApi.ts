@@ -1,41 +1,54 @@
 // lib/getProjectById.ts
 import { ProjectData, ProjectOverview } from "@/types/types";
+import { fetchWithCache } from "./fetchWithCache";
 
-const API=process.env.NODE_ENV==='production'? process.env.NEXT_PUBLIC_API_URL_PRODUCTION : process.env.NEXT_PUBLIC_API_URL;
+const API =
+  process.env.NODE_ENV === "production"
+    ? process.env.NEXT_PUBLIC_API_URL_PRODUCTION
+    : process.env.NEXT_PUBLIC_API_URL;
 
+/**
+ * Fetch a single project by ID with caching
+ * Cache TTL: 10 minutes
+ */
 export async function getProjectById(
   id: string
 ): Promise<ProjectData | null> {
   try {
-    const res = await fetch(
+    const response = await fetchWithCache<ProjectData>(
       `${API}/projects/${id}`,
+      { method: "GET" },
       {
-        cache: "no-store", // or "force-cache" / revalidate if needed
+        ttl: 10 * 60 * 1000, // 10 minutes
+        storageType: "localStorage",
       }
     );
 
-    if (!res.ok) {
-      return null;
-    }
-
-    return res.json();
+    return response.data || null;
   } catch (error) {
     console.error("Failed to fetch project:", error);
     return null;
   }
 }
 
+/**
+ * Fetch all projects overview with caching
+ * Cache TTL: 15 minutes
+ */
 export async function getProjectsOverview(): Promise<ProjectOverview[]> {
-  const res = await fetch(
-    `${API}/projects/overview`,
-    {
-      cache: "no-store", // or 'force-cache' if you want static
-    }
-  );
+  try {
+    const response = await fetchWithCache<ProjectOverview[]>(
+      `${API}/projects/overview`,
+      { method: "GET" },
+      {
+        ttl: 15 * 60 * 1000, // 15 minutes
+        storageType: "localStorage",
+      }
+    );
 
-  if (!res.ok) {
-    throw new Error("Failed to fetch projects");
+    return response.data || [];
+  } catch (error) {
+    console.error("Failed to fetch projects overview:", error);
+    return [];
   }
-
-  return res.json();
 }
