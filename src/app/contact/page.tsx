@@ -22,10 +22,10 @@ export default function Contact() {
           <div className="bg-white/10 backdrop-blur-sm p-6 rounded-lg hover:bg-white/15 transition-all duration-300">
             <h3 className="text-xl font-bold mb-2">University Email</h3>
             <a
-              href="mailto:Toan.tran@tuni.fi"
+              href="mailto:toan.tran@tuni.fi"
               className="text-cyan-400 hover:text-cyan-300 transition-colors break-all text-sm md:text-base"
             >
-              Toan.tran@tuni.fi
+              toan.tran@tuni.fi
             </a>
           </div>
           <div className="bg-white/10 backdrop-blur-sm p-6 rounded-lg hover:bg-white/15 transition-all duration-300">
