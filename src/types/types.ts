@@ -6,6 +6,7 @@ interface Step {
   content: {
     engineering: string;
   };
+  images?: string [];
 }
 
 interface ProjectData {
@@ -33,3 +34,13 @@ interface ProjectOverview {
 };
 
 export type { ProjectOverview,ProjectData, Step };
+
+
+/* ./components/ImageSwiper */
+interface ImageSwiperProps {
+  images: string[];
+  title: string;
+  autoPlay?: boolean;
+  autoPlayInterval?: number;
+}
+export type { ImageSwiperProps };

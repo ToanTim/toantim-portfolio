@@ -2,13 +2,15 @@ import mongoose from 'mongoose';
 import {Project} from '../models/project';
 // 1. This small function decides which database connection string (URI) to use
 const getMongoUri = (): string => {
-  const env = process.env.NODE_ENV || 'development';   // ← reads NODE_ENV (most important part!)
+  const env = process.env.NODE_ENV;   // ← reads NODE_ENV (most important part!)
 
   // In production → must use cloud database (Atlas)
+  console.log(`[MongoDB] Current NODE_ENV: ${env}`);
   if (env === 'production') {
     if (!process.env.MONGODB_URI) {                    // ← safety check
       throw new Error('MONGODB_URI is required in production!');
     }
+    console.log('[MongoDB] 🚀 PRODUCTION MODE → Connecting to MongoDB Atlas (Cloud)');
     return process.env.MONGODB_URI;                   // ← returns Atlas URI
   }
 
@@ -16,7 +18,8 @@ const getMongoUri = (): string => {
   const localUri = process.env.MONGODB_URI_LOCAL 
                 || 'mongodb://localhost:27017/portfolio-dev';   // ← fallback to default local
 
-  console.log(`[MongoDB] Connecting to LOCAL database → ${localUri}`);
+  console.log('[MongoDB] 💻 DEVELOPMENT MODE → Connecting to Local MongoDB');
+  console.log(`[MongoDB] URI: ${localUri}`);
   return localUri;
 };
 
@@ -43,7 +46,9 @@ export async function connectDB(): Promise<typeof mongoose> {
     });
 
     isConnected = true;
-    console.log(`[MongoDB] Connected successfully to ${mongoose.connection.name}`);
+    const dbName = mongoose.connection.name;
+    const env = process.env.NODE_ENV || 'development';
+    console.log(`[MongoDB] ✅ Connected successfully to ${dbName} (${env.toUpperCase()})`);
 
     // Bonus: if connection drops later → we notice it
     mongoose.connection.on('error', (err) => {

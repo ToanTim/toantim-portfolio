@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import type { ProjectData, Step } from "../../../types/types";
 import { getProjectById } from "@/utils/fetchProjectApi";
+import { ImageSwiper } from "@/components";
 import { time } from "console";
 
 export default function ProjectDetail() {
@@ -20,6 +21,7 @@ export default function ProjectDetail() {
     setLoading(true);
     getProjectById(projectId).then((data) => {
       setProject(data);
+      console.log(data);
       setTimeout(() => {
         setLoading(false);
       }, 500);
@@ -110,7 +112,7 @@ export default function ProjectDetail() {
               <div className="space-y-1">
                 {project.steps.map((step, index) => (
                   <button
-                    key={step.id}
+                    key={index}
                     onClick={() => {
                       setCurrentIndex(index);
                     }}
@@ -177,12 +179,16 @@ export default function ProjectDetail() {
             )}
 
             {/* Step content */}
-            <div className="bg-gray-800 rounded-lg shadow-xl p-6 md:p-8 min-h-[600px] border border-gray-700">
+            <div className="bg-gray-800 rounded-lg shadow-xl p-6 md:p-8 border border-gray-700">
               <div
                 dangerouslySetInnerHTML={{
                   __html: project.steps[currentIndex].content.engineering,
                 }}
               />
+            </div>
+
+            <div className="text-sm text-gray-400 text-center">
+              Slide {currentIndex + 1} of {project.steps.length}
             </div>
 
             {/* Navigation Footer */}
@@ -212,15 +218,11 @@ export default function ProjectDetail() {
                 Previous
               </button>
 
-              <div className="text-sm text-gray-400">
-                Step {currentIndex} of {project.steps.length}
-              </div>
-
               <button
                 onClick={handleNext}
-                disabled={currentIndex === project.steps.length}
+                disabled={currentIndex + 1 === project.steps.length}
                 className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition ${
-                  currentIndex === project.steps.length
+                  currentIndex === project.steps.length - 1
                     ? "bg-gray-800 text-gray-600 cursor-not-allowed border border-gray-700"
                     : "bg-cyan-500 text-white hover:bg-cyan-600 shadow-lg hover:shadow-cyan-500/50"
                 }`}
@@ -240,6 +242,23 @@ export default function ProjectDetail() {
                   />
                 </svg>
               </button>
+            </div>
+
+            {/* Step image with swiper/slider */}
+            <div
+              style={{
+                display:
+                  project.steps[currentIndex].images &&
+                  project.steps[currentIndex].images.length > 0
+                    ? "block"
+                    : "none",
+              }}
+            >
+              <ImageSwiper
+                key={currentIndex}
+                images={project.steps[currentIndex].images || []}
+                title={project.steps[currentIndex].title || ""}
+              />
             </div>
           </main>
         </div>

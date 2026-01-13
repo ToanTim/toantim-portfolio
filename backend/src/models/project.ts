@@ -7,6 +7,7 @@ const StepSchema = new mongoose.Schema({
   content: {
     engineering: { type: String, required: true }, // HTML string
   },
+  images: { type: [String], default: [] },
 });
 
 const ProjectSchema = new mongoose.Schema({
