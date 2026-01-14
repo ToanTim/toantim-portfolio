@@ -136,7 +136,7 @@ export default function ProjectDetail() {
                           Step {step.id}
                         </div>
                         <div
-                          className={`text-sm font-medium truncate ${
+                          className={`text-sm font-medium break-words whitespace-normal ${
                             currentIndex === index
                               ? "text-cyan-400"
                               : "text-gray-300"
@@ -177,6 +177,9 @@ export default function ProjectDetail() {
 
             {/* Step content */}
             <div className="bg-gray-800 rounded-lg shadow-xl p-6 md:p-8 border border-gray-700">
+              <h1 className="text-2xl font-bold text-white mb-4 text-center">
+                {project.steps[currentIndex].title}
+              </h1>
               <div
                 dangerouslySetInnerHTML={{
                   __html: project.steps[currentIndex].content.engineering,
