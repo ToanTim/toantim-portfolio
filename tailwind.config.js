@@ -33,6 +33,10 @@ module.exports = {
     // aspect ratio (YouTube iframe)
     "aspect-w-16",
     "aspect-h-9",
+
+    // Break word to new line
+    "break-words",
+    "whitespace-normal",
   ],
 
   theme: {
