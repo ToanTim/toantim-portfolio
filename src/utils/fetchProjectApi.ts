@@ -15,6 +15,17 @@ export async function getProjectById(
   id: string
 ): Promise<ProjectData | null> {
   try {
+    // Skip caching in development
+    if (process.env.NODE_ENV === "development") {
+      const response = await fetch(`${API}/projects/${id}`, {
+        method: "GET",
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return await response.json();
+    }
+
     const response = await fetchWithCache<ProjectData>(
       `${API}/projects/${id}`,
       { method: "GET" },
@@ -37,6 +48,17 @@ export async function getProjectById(
  */
 export async function getProjectsOverview(): Promise<ProjectOverview[]> {
   try {
+    // Skip caching in development
+    if (process.env.NODE_ENV === "development") {
+      const response = await fetch(`${API}/projects/overview`, {
+        method: "GET",
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return await response.json();
+    }
+
     const response = await fetchWithCache<ProjectOverview[]>(
       `${API}/projects/overview`,
       { method: "GET" },
