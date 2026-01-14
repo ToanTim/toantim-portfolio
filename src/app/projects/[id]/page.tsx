@@ -8,6 +8,7 @@ import { getProjectById } from "@/utils/fetchProjectApi";
 import { ImageSwiper } from "@/components";
 import { ProjectDetailSkeleton } from "@/components/skeletons";
 import { time } from "console";
+import { scrollToTop } from "@/utils/scrollToTop";
 
 export default function ProjectDetail() {
   const [project, setProject] = useState<ProjectData | null>(null);
@@ -42,13 +43,14 @@ export default function ProjectDetail() {
     return null;
   }
 
-  const currentStep = project.steps.find((s) => s.id === activeStep);
-
   const handlePrevious = () => {
     if (currentIndex > 0) {
       setActiveStep(project.steps[currentIndex - 1].id);
       setCurrentIndex(currentIndex - 1);
       //console.log(currentIndex);
+      setTimeout(() => {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }, 100);
     }
   };
 
@@ -58,6 +60,9 @@ export default function ProjectDetail() {
       setActiveStep(project.steps[currentIndex + 1].id);
       setCurrentIndex(currentIndex + 1);
       //console.log(currentIndex);
+      setTimeout(() => {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }, 100);
     }
   };
 
