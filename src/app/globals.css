@@ -1,5 +1,4 @@
 /* File that might affect styling in production level if change */
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
