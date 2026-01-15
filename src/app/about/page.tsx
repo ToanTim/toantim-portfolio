@@ -10,12 +10,13 @@ export default function About() {
             <p className="text-lg text-gray-600 mb-6">
               I work at the intersection of machine learning and signal
               processing, applying signal processing principles to data-driven
-              problems.
+              problems. I am a Master's student in Signal Processing and Machine
+              Learning at Tampere University, based in Tampere, Finland.
             </p>
             <p className="text-lg text-gray-600 mb-6">
-              Based in Tampere, Finland, my focus areas include supervised and
-              unsupervised learning, time-series analysis, digital filtering,
-              and spectral analysis.
+              My interests include supervised and unsupervised learning,
+              time-series analysis, digital filtering, and spectral analysis. I
+              am actively seeking thesis or applied AI/ML opportunities.
             </p>
 
             <div className="flex flex-wrap gap-4">
