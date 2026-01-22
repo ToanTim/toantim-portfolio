@@ -7,8 +7,6 @@ import type { ProjectData, Step } from "../../../types/types";
 import { getProjectById } from "@/utils/fetchProjectApi";
 import { ImageSwiper } from "@/components";
 import { ProjectDetailSkeleton } from "@/components/skeletons";
-import { time } from "console";
-import { scrollToTop } from "@/utils/scrollToTop";
 
 export default function ProjectDetail() {
   const [project, setProject] = useState<ProjectData | null>(null);
@@ -117,6 +115,9 @@ export default function ProjectDetail() {
                     key={index}
                     onClick={() => {
                       setCurrentIndex(index);
+                      setTimeout(() => {
+                        window.scrollTo({ top: 0, behavior: "smooth" });
+                      }, 100);
                     }}
                     className={`w-full text-left p-3 rounded-lg transition ${
                       currentIndex === index
@@ -130,8 +131,8 @@ export default function ProjectDetail() {
                           currentIndex === index
                             ? "bg-cyan-500 text-white"
                             : currentIndex > index
-                            ? "bg-gray-600 text-white"
-                            : "bg-gray-700 text-gray-400"
+                              ? "bg-gray-600 text-white"
+                              : "bg-gray-700 text-gray-400"
                         }`}
                       >
                         {currentIndex > index ? "✓" : index + 1}

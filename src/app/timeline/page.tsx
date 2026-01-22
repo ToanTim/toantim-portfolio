@@ -44,6 +44,23 @@ const items: TimelineEntry[] = [
     ],
   },
   {
+    title: "Integrify ©",
+    subtitle: "Full Stack Web Development, Computer Science",
+    date: "Jan 2024 — Sep 2024",
+    description:
+      "Completed full stack web development training with a strong focus on practical projects, teamwork, and software engineering best practices.",
+    type: "education",
+    icon: "GraduationCap",
+    tags: [
+      "Node.js",
+      "Full Stack Development",
+      "Teamwork",
+      "Software Engineering",
+      "Problem Solving",
+    ],
+  },
+
+  {
     title: "Intern Full-stack Developer",
     subtitle: "Commu App · Part-time",
     date: "May 2023 — Sep 2023",
