@@ -6,13 +6,17 @@ import About from "./about/page";
 import Contact from "./contact/page";
 import Research from "./research/page";
 import Project from "./projects/page";
+import Timeline from "./timeline/page";
+
 export default function Home() {
   const [showScrollTop, setShowScrollTop] = useState(false);
 
   useEffect(() => {
     // Smooth scroll function
-    interface SmoothScrollEvent
-      extends React.MouseEvent<HTMLAnchorElement, MouseEvent> {
+    interface SmoothScrollEvent extends React.MouseEvent<
+      HTMLAnchorElement,
+      MouseEvent
+    > {
       currentTarget: HTMLAnchorElement;
     }
 
@@ -79,6 +83,14 @@ export default function Home() {
             <p className="text-xl md:text-2xl text-gray-300 mb-4 max-w-3xl mx-auto">
               Machine Learning & Signal Processing Engineer
             </p>
+            <div className="mb-6 mx-auto max-w-4xl">
+              <div className="inline-block bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border border-cyan-400/40 rounded-lg px-6 py-3 backdrop-blur-sm">
+                <p className="text-cyan-300 font-semibold text-base md:text-lg">
+                  🔍 Seeking Thesis/Applied AI/ML Opportunities | Computer
+                  Vision & MLOps | Python & C++
+                </p>
+              </div>
+            </div>
             <p className="text-lg text-gray-400 mb-8 max-w-2xl mx-auto">
               Applying signal processing principles to machine learning
               problems. Based in Tampere, Finland.
@@ -118,6 +130,11 @@ export default function Home() {
       {/* About Section */}
       <section id="about" className="min-h-screen pt-20 bg-gray-100">
         <About />
+      </section>
+
+      {/* Timeline Section */}
+      <section id="timeline" className="min-h-screen pt-20 bg-gray-100">
+        <Timeline />
       </section>
 
       {/* Projects Section */}
