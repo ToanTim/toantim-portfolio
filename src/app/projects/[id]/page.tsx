@@ -167,15 +167,38 @@ export default function ProjectDetail() {
                   <h3 className="text-xl font-semibold text-white mb-2">
                     Problem Statement
                   </h3>
-                  <p className="text-gray-300 leading-relaxed">
+
+                  <p className="text-gray-300 leading-relaxed mb-3">
                     {project.description}
                   </p>
+
+                  {/* GitHub Repository Link */}
+                  {project.github_link && (
+                    <a
+                      href={project.github_link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 transition-colors font-medium"
+                    >
+                      {/* GitHub Icon */}
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                        className="w-5 h-5"
+                      >
+                        <path d="M12 .5C5.73.5.5 5.74.5 12.02c0 5.11 3.29 9.44 7.86 10.97.58.1.79-.25.79-.56v-2.17c-3.2.7-3.88-1.54-3.88-1.54-.53-1.34-1.29-1.7-1.29-1.7-1.05-.72.08-.71.08-.71 1.16.08 1.77 1.2 1.77 1.2 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.23-1.28-5.23-5.7 0-1.26.45-2.29 1.19-3.1-.12-.3-.52-1.52.11-3.16 0 0 .97-.31 3.18 1.18a11.06 11.06 0 012.9-.39c.98 0 1.97.13 2.9.39 2.2-1.49 3.17-1.18 3.17-1.18.64 1.64.24 2.86.12 3.16.74.81 1.18 1.84 1.18 3.1 0 4.43-2.69 5.4-5.26 5.68.41.36.78 1.08.78 2.18v3.23c0 .31.21.67.8.56A11.52 11.52 0 0023.5 12.02C23.5 5.74 18.27.5 12 .5z" />
+                      </svg>
+                      View on GitHub
+                    </a>
+                  )}
                 </div>
+
                 <div className="flex justify-end">
                   <img
                     src={project.image}
                     alt={`${project.title} preview`}
-                    className="w-full max-w-md rounded-lg shadow-lg object-cover"
+                    className="w-full max-w-md rounded-lg shadow-lg object-cover border border-gray-700"
                   />
                 </div>
               </div>

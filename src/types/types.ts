@@ -12,6 +12,7 @@ interface Step {
 interface ProjectData {
   id: string;
   title: string;
+  github_link?: string;
   description: string;
   image?: string;
   gradient: string;
