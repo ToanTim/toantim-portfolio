@@ -7,6 +7,7 @@ import Contact from "./contact/page";
 import Research from "./research/page";
 import Project from "./projects/page";
 import Timeline from "./timeline/page";
+import PaperReadingsSection from "../components/paper-readings/PaperReadingsSection";
 
 export default function Home() {
   const [showScrollTop, setShowScrollTop] = useState(false);
@@ -177,8 +178,16 @@ export default function Home() {
       </section>
 
       {/* Research Section */}
-      <section id="research" className="min-h-screen pt-20 bg-gray-50">
+      <section
+        id="research"
+        className="min-h-screen pt-20 bg-gray-50 bg-gradient-to-br from-gray-900 via-gray-800 to-black"
+      >
         <Research />
+      </section>
+
+      {/* Paper Readings Section */}
+      <section id="paper-readings" className="min-h-screen pt-20 bg-gray-50">
+        <PaperReadingsSection headingLevel="h2" />
       </section>
 
       {/* Contact Section */}

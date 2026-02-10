@@ -37,6 +37,24 @@ interface ProjectOverview {
 export type { ProjectOverview,ProjectData, Step };
 
 
+/* ./paper-readings */
+interface Paper {
+  id: string;
+  title: string;
+  authors: string;
+  venue: string;
+  year: number;
+  category: string;
+  readDate: string;
+  summary: string;
+  tags: string[];
+  notionUrl: string;
+  paperUrl: string;
+}
+
+export type { Paper };
+
+
 /* ./components/ImageSwiper */
 interface ImageSwiperProps {
   images: string[];
