@@ -13,7 +13,7 @@ export const paperReadings: Paper[] = [
       "Introduced Mamba, a selective state space model that achieves linear-time sequence modeling, avoiding quadratic attention while maintaining strong long-context performance and hardware efficiency.",
     tags: ["State Space Models", "Sequence Modeling", "Mamba", "Efficient AI"],
     notionUrl:
-      "https://www.notion.so/Mamba-1-2026-30261d4f0a8043a80cfa97b8d6be3f?source=copy_link",
+      "https://www.notion.so/Mamba-1-2026-30261d4f4f0a8043a80cfa97b8d6be3f?source=copy_link",
     paperUrl: "https://arxiv.org/abs/2312.00752",
   }
 ];
