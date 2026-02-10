@@ -104,6 +104,12 @@ export default function Home() {
                 View Projects
               </a>
               <a
+                href="#paper-readings"
+                className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 px-8 py-3 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105"
+              >
+                Paper Readings & Notes
+              </a>
+              <a
                 href="#contact"
                 className="border-2 border-white/20 hover:border-cyan-400 px-8 py-3 rounded-lg font-semibold transition-all duration-300 hover:bg-white/10"
               >
